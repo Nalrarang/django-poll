@@ -16,42 +16,48 @@
 <header>
     <h1>설문조사</h1>
 </header>
-<div class="content">
-    {% for reader in readers %}
-        <div class="question-wrap">
-            <div class="question" type="{{ reader.type }}">Q.{{ forloop.counter }} {{ reader.question }}</div>
-            {% if reader.type == 'select' %}
-                <select class="form-control">
-                    {% for item in reader.item %}
-                        <option>{{ item }}</option>
-                    {% endfor %}
-                </select>
-            {% elif reader.type == 'checkbox' %}
-                <div class="checkbox">
-                    {% for item in reader.item %}
-                    <label class="checkbox-inline">
-                      <input type="checkbox" name= "q{{ forloop.parentloop.counter }}-checkbox" value= "{{ item }}">
-                      {{ item }}
-                    </label>
-                    {% endfor %}
-                </div>
-            {% elif reader.type == 'radio' %}
-                <div class="radio">
-                    {% for item in reader.item %}
-                    <label>
-                      <input type="radio" name="q{{ forloop.parentloop.counter }}-Radio" class="q{{ forloop.parentloop.counter }}-Radio" value="{{ item }}">
-                      {{ item }}
-                    </label>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-    {% endfor %}
-        <label for="phoneNumber">휴대폰 번호를 입력하시고 완료 버튼을 누르세요.</label>
-        <input type="text" class="form-control" id="phoneNumber" placeholder="휴대폰번호">
-        <input type="submit" value="Vote" class="vote" />
-</div>
 
+<div class="container">
+    <div class="content">
+        {% for reader in readers %}
+            <div class="question-wrap">
+                <div class="question" type="{{ reader.type }}">Q{{ forloop.counter }}. {{ reader.question }}</div>
+                {% if reader.type == 'select' %}
+                    <select class="form-control">
+                        {% for item in reader.item %}
+                            <option>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                {% elif reader.type == 'checkbox' %}
+                    <div class="checkbox">
+                        {% for item in reader.item %}
+                        <label class="checkbox-inline">
+                          <input type="checkbox" name= "q{{ forloop.parentloop.counter }}-checkbox" value= "{{ item }}">
+                          {{ item }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                {% elif reader.type == 'radio' %}
+                    <div class="radio">
+                        {% for item in reader.item %}
+                        <label>
+                          <input type="radio" name="q{{ forloop.parentloop.counter }}-Radio" class="q{{ forloop.parentloop.counter }}-Radio" value="{{ item }}">
+                          {{ item }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+            <div class="phone-wrap">
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label for="phoneNumber">※ 휴대폰 번호를 입력하시고 완료 버튼을 누르세요.</label>
+                        <input type="text" class="form-control" id="phoneNumber" placeholder="휴대폰번호">
+                        <button type="submit" class="btn btn-primary vote" value="Vote">완료</button>
+                    </div>
+                </form>
+            </div>
 
 <script type="text/javascript" src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
@@ -95,11 +101,11 @@
                 var phoneNumber = $('#phoneNumber').val();
                 phoneNumber = phoneNumber.replace(/-/gi, "");
                 if(phoneNumber == '') { 
-                    alert('전화번호를 입력해주세요'); 
+                    alert('휴대폰 번호를 입력해주세요'); 
                     return false;
                 }
                 if(phoneNumber.length < 10) {
-                    alert('올바른 전화번호를 입력해주세요.');
+                    alert('올바른 휴대폰 번호를 입력해주세요.');
                     return false;
                 }
                 /* 설문조사 항목 유효성 체크 */
@@ -178,6 +184,7 @@
                 url :  "poll/vote/",
                 dataType: "json",
                 data : {
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
                     phonenumber: phone,
                     question: question.join(),
                     answer : survey.join()

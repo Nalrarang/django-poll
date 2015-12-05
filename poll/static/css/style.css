@@ -1,0 +1,66 @@
+body {
+    margin: 0;
+    padding: 0;
+    margin: 0;
+    padding: 0;
+    background-color: #F7F6F1;
+}
+h1 {
+    margin:0; padding:0;
+    line-height: 60px;
+}
+
+header {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    text-align: center;
+}
+.container {
+    margin-bottom: 15px;
+}
+.content {
+    position: relative;
+    width: 100%;
+    background-color: white;
+    border: 1px solid #DFDFDF;
+    border-radius: 4px;
+}
+.question-wrap, .phone-wrap {
+    padding: 10px 20px 10px 20px;
+}
+.question {
+    font-size: 1.3em;
+}
+select.form-control {
+    width: 80%;
+    max-width: 300px;
+    margin-top: 5px;
+}
+
+.radio label {
+    margin-bottom: 5px;
+    margin-right: 20px;
+    min-width: 200px;
+}
+.checkbox label {
+    margin-bottom: 5px;
+    margin-right: 20px;
+    min-width: 120px;
+}
+
+.checkbox-inline+.checkbox-inline {
+    margin-left: 0px;
+
+}
+.phone-wrap .form-inline .form-group {
+    display: inline-block;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+.phone-wrap .form-control {
+    display: inline-block;
+    margin-bottom: 0;
+    vertical-align: middle;
+    width: auto;
+}
