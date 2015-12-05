@@ -8,32 +8,46 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Buzzni Survey Result</title>
-    <!-- <link rel="shortcut icon" href="/media/favicon.ico"> -->
+    <!-- <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}"> -->
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700,300&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 <header>
-    <h1>설문 조사 결과</h1>
+    <h1>설문 조사 결과<span class="total">(총 참여 인원: {{ total }} 명)</span></h1>
 </header>
+<div class="container">
 <div class="content">
-<div class="total">총 참여 인원: {{ total }} 명</div>
-{% for result in results %}
-    <div class="question-wrap">
-        <div class="question">Q{{ forloop.counter }}. {{ result.question }}</div>
-        <ul class="answer">
-            {% for key,value in result.item.items %}
-                <li>{{ key }} - {{ value }}명({{ value|mul:100|intdiv:total }}%)</li>                
-            {% endfor %}
-        </ul>
+    {% for result in results %}
+        <div class="question-wrap">
+            <div class="question">Q{{ forloop.counter }}. {{ result.question }}</div>
+            <ul class="answer">
+                {% for key,value in result.item.items %}
+                    <li>
+                       {% if result.type == 'checkbox' %}                            
+                            <div class="key">
+                                <div class="percent" style="width:100%"></div>
+                                <div class="text">{{ key }}</div>
+                            </div> 
+                            <div class="value">{{ value }}명 선택</div>
+                        {% else %}
+                        <div class="key">
+                            <div class="percent" style="width:{{ value|mul:100|intdiv:total }}%"></div>
+                            <div class="text">{{ key }}</div>
+                        </div> 
+                        <div class="value">{{ value }}명({{ value|mul:100|intdiv:total }}%)</div>
+                       {% endif%}
+                    </li>                
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
     </div>
-{% endfor %}
 </div>
 
 
 <script type="text/javascript" src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
 
 </body>
 </html>

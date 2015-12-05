@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Buzzni Survey</title>
-    <!-- <link rel="shortcut icon" href="/media/favicon.ico"> -->
+    <!-- <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}"> -->
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700,300&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -29,7 +29,7 @@
                         {% endfor %}
                     </select>
                 {% elif reader.type == 'checkbox' %}
-                    <div class="checkbox">
+                    <div class="checkbox" limit="{{ reader.limit }}">
                         {% for item in reader.item %}
                         <label class="checkbox-inline">
                           <input type="checkbox" name= "q{{ forloop.parentloop.counter }}-checkbox" value= "{{ item }}">
@@ -53,155 +53,15 @@
                 <form class="form-inline">
                     <div class="form-group">
                         <label for="phoneNumber">※ 휴대폰 번호를 입력하시고 완료 버튼을 누르세요.</label>
-                        <input type="text" class="form-control" id="phoneNumber" placeholder="휴대폰번호">
+                        <input type="text" class="form-control" id="phoneNumber" placeholder="휴대폰번호" maxlength="11">
                         <button type="submit" class="btn btn-primary vote" value="Vote">완료</button>
                     </div>
                 </form>
             </div>
 
 <script type="text/javascript" src="{% static 'js/jquery-1.11.3.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
-
-<script>
-    $( document ).ready(function() {
-        /* 설문조사 Type이 체크박스인 것 복수선택 데이터 저장용 변수 */
-        var checkbox = {};
-        /* 설문조사 답변 저장용 배열 변수 */
-        var survey = [];
-        /* 설문조사 문항 저장 */
-        var question = [];
-
-        var eventListener = function(){
-            for(var i=0; i < $('.checkbox').length; i++){
-                (function(index){
-                    var checkboxName = $('.checkbox:nth('+index+') input').attr('name');
-                    checkbox[checkboxName] = [];
-                    $('input[name="'+ checkboxName +'"]').on('click', function(){
-                        if($('input[name="'+ checkboxName +'"]:checked').length > 3) {
-                            alert('해당 항목의 선택은 3개까지만 가능합니다.');
-                            return;
-                        }
-
-                        var idx = $('input[name="'+ checkboxName +'"]').index(this);
-                        if($('input[name="'+ checkboxName +'"]').eq(idx).is(':checked')) {
-                            checkbox[checkboxName].push($('.checkbox:nth('+index+') input').eq(idx).attr('value'));
-                        } else {
-                            var val = $('.checkbox:nth('+index+') input').eq(idx).attr('value');                            
-                            var del_idx = checkbox[checkboxName].indexOf(val);
-                            checkbox[checkboxName] = (checkbox[checkboxName].slice(0,del_idx)).concat(checkbox[checkboxName].slice(del_idx+1, checkbox[checkboxName].length));
-                        }
-                    });
-                })(i);
-            }
-
-            /* 투표하기 버튼 클릭 이벤트 */
-            $('.vote').off('click').on('click', function(evt){
-                evt.preventDefault();
-                /* 전화 번호 유효성 체크 */
-                var phoneNumber = $('#phoneNumber').val();
-                phoneNumber = phoneNumber.replace(/-/gi, "");
-                if(phoneNumber == '') { 
-                    alert('휴대폰 번호를 입력해주세요'); 
-                    return false;
-                }
-                if(phoneNumber.length < 10) {
-                    alert('올바른 휴대폰 번호를 입력해주세요.');
-                    return false;
-                }
-                /* 설문조사 항목 유효성 체크 */
-                var answer = validate_check();
-
-                /* 데이터가 이상 없으면 투표하기 */
-                if(answer) {
-                    vote(phoneNumber, question, answer);
-                }
-            });            
-        }
-        /**
-         * setup JQuery's AJAX methods to setup CSRF token in the request before sending it off.
-         * http://stackoverflow.com/questions/5100539/django-csrf-check-failing-with-an-ajax-post-request
-         */
-        function getCookie(name)
-        {
-            var cookieValue = null;
-            if (document.cookie && document.cookie != '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = jQuery.trim(cookies[i]);
-                    // Does this cookie string begin with the name we want?
-
-                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-        $.ajaxSetup({ 
-             beforeSend: function(xhr, settings) {
-                 if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                     // Only send the token to relative URLs i.e. locally.
-                     xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                 }
-             } 
-        });
-
-        function validate_check(){
-            var questionWrap = $('.question-wrap');
-            var questionLength = questionWrap.length;
-            for(var i=0; i<questionLength; i++){
-                /* 설문조사의 문항을 저장 */
-                question.push(questionWrap.eq(i).children('.question').text());
-                var type = questionWrap.eq(i).children('.question').attr('type');
-                var answer;
-                if(type == 'select') {
-                    answer = questionWrap.eq(i).children('select').val();
-                }
-                else if(type == 'radio') {
-                    answer = $('input[name=q'+(i+1)+'-Radio]:checked').val();
-                    if(answer == undefined){
-                        alert('모든 항목의 설문에 응답해 주세요');
-                        return false;
-                    }
-                } else if(type == 'checkbox') {
-                    if(checkbox['q'+(i+1)+'-checkbox'].length == 0) {
-                        alert('체크박스의 항목은 1개 이상 선택해야 합니다.');
-                        return false;
-                    }
-                    answer = checkbox['q'+(i+1)+'-checkbox'].join(":");
-                }
-                
-                survey.push(answer);
-            }
-
-            return survey;
-        }
-        /* 투표하기 */
-        function vote(phone,question,data){
-             $.ajax({
-                type : "POST",
-                url :  "poll/vote/",
-                dataType: "json",
-                data : {
-                    csrfmiddlewaretoken: "{{ csrf_token }}",
-                    phonenumber: phone,
-                    question: question.join(),
-                    answer : survey.join()
-                },
-                success : function(result) {
-                    if(result == 'success') {
-                        alert('설문에 참여해 주셔서 감사합니다.');
-                        location.href = '/';
-                    }
-                }
-            });   
-        }
-
-        eventListener();
-    });        
-</script>
-
+<script type="text/javascript" src="{% static 'js/csrf.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/main.js' %}"></script>
 
 </body>
 </html>

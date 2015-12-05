@@ -5,6 +5,7 @@ from .models import Poll
 
 import csv,json
 
+#CSV파일 읽어오기
 def getCsvFile():
     surveyObject = {}
     surveyArray = []
@@ -73,31 +74,15 @@ def poll_result(request):
 
         row['item'] = answer
 
-
-    # result = {}
     for row in poll:
         data = row['answer'].split(",")
         for index,r in enumerate(data):
             # print(index , r)
             if surveyArray[index]['type'] == 'checkbox':
                 r = r.split(":")
-                r = r[0]
-
-
-
-            surveyArray[index]['item'][r] += 1
-    #         key = 'Q'+str(index)
-    #         if (key in result) == False:
-    #             result[key] = {}
-
-    #         print(r in result[key])
-    #         if (r in result[key]) == True:
-    #             result[key][r] += 1
-    #         else: 
-    #             result[key][r] = 1
-
-
-    # print(result)
-
+                for i in r:
+                    surveyArray[index]['item'][i] += 1
+            else:
+                surveyArray[index]['item'][r] += 1
 
     return render(request, 'poll/poll_result.html', {'results': surveyArray , 'total': len(poll)})
