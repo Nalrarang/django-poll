@@ -5,8 +5,19 @@ from .models import Poll
 
 import csv,json
 
+# 설문조사 페이지 
+def poll_main(request):
+    surveyArray = read_csv()
+
+    return render(request, 'poll/poll_main.html', {'readers': surveyArray})
+# 조사 결과 확인 페이지
+def poll_result(request):
+    result = result_survey()
+
+    return render(request, 'poll/poll_result.html', {'results': result[0] , 'total': result[1]})
+
 #CSV파일 읽어오기
-def getCsvFile():
+def read_csv():
     surveyObject = {}
     surveyArray = []
     surveyItem = []
@@ -40,13 +51,26 @@ def getCsvFile():
     csv_file.close()
 
     return surveyArray
+#CSV파일 내보내기
+def export_csv(request):
+    #CSV 파일 쓰기
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment;filename="survey_result.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['질문', '설문 타입', '복수 응답 갯수', '응답/응답 수'])
+    result = result_survey()
 
+    #각 행별로 데이터를 적어줌
+    for row in result[0]:
+        writeobj = [row['question'], row['type'], row['limit']]
+        data = row['item']
+        for key,value in data.items():
+            writeobj.append(key)
+            writeobj.append(str(value) + '명')
 
-# 설문조사 페이지 
-def poll_main(request):
-    surveyArray = getCsvFile()
-
-    return render(request, 'poll/poll_main.html', {'readers': surveyArray})
+        writer.writerow(writeobj)
+    
+    return response
 
 # 투표하기
 def poll_vote(request):
@@ -62,27 +86,32 @@ def poll_vote(request):
         # 저장 후 성공 및 실패 여부를 리턴해준다.
         return HttpResponse(json.dumps(result), content_type = "application/json")
 
-# 조사 결과 확인 페이지
-def poll_result(request):
-    poll = Poll.show_poll()
-    surveyArray = getCsvFile()
-
+# 조사 결과 데이터 정합
+def result_survey():
+    poll = Poll.show_poll('answer')
+    surveyArray = read_csv()
+    result = []
+    # 조사 결과의 응답문항별 인원수 체크를 위해 숫자를 넣어줌
     for row in surveyArray:
         answer = {}
         for item in row['item']:
             answer[item] = 0
 
         row['item'] = answer
-
-    for row in poll:
+    # 응답 문항을 정합하여 결과 수 체크
+    for idx,row in enumerate(poll):
         data = row['answer'].split(",")
-        for index,r in enumerate(data):
-            # print(index , r)
-            if surveyArray[index]['type'] == 'checkbox':
-                r = r.split(":")
-                for i in r:
-                    surveyArray[index]['item'][i] += 1
-            else:
-                surveyArray[index]['item'][r] += 1
 
-    return render(request, 'poll/poll_result.html', {'results': surveyArray , 'total': len(poll)})
+        for index,r in enumerate(data):
+            if index < len(surveyArray):
+                if surveyArray[index]['type'] == 'checkbox':
+                    r = r.split(":")
+                    for i in r:
+                       surveyArray[index]['item'][i] = 1
+                else:
+                    surveyArray[index]['item'][r] += 1
+
+    result.append(surveyArray)
+    result.append(len(poll))
+
+    return result

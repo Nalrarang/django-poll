@@ -8,7 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Buzzni Survey Result</title>
-    <!-- <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}"> -->
+    <link rel="shortcut icon" href="{% static 'resource/favicon.ico' %}">
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700,300&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -18,7 +18,7 @@
     <h1>설문 조사 결과<span class="total">(총 참여 인원: {{ total }} 명)</span></h1>
 </header>
 <div class="container">
-<div class="content">
+    <div class="content">
     {% for result in results %}
         <div class="question-wrap">
             <div class="question">Q{{ forloop.counter }}. {{ result.question }}</div>
@@ -43,8 +43,13 @@
             </ul>
         </div>
     {% endfor %}
-    </div>
-</div>
+        <div class="export-wrap">
+            <a href="/poll/export/">
+                <button type="button" class="btn btn-primary btn-lg btn-block">조사 결과 다운받기</button>
+            </a>
+        </div>
+    </div> <!-- End Content -->
+</div> <!-- End Container -->
 
 
 <script type="text/javascript" src="{% static 'js/jquery-1.11.3.min.js' %}"></script>

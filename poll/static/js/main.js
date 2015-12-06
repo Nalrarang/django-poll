@@ -1,3 +1,4 @@
+/* 설문 조사 페이지 Javascript */
 $( document ).ready(function() {
     /* 설문조사 Type이 체크박스인 것 복수선택 데이터 저장용 변수 */
     var checkbox = {};
@@ -109,16 +110,21 @@ $( document ).ready(function() {
            url :  "poll/vote/",
            dataType: "json",
            data : {
-               csrfmiddlewaretoken: "{{ csrf_token }}", //이게 없으면 Mobile에서 안됨..
+               csrfmiddlewaretoken: csrfmiddlewaretoken, // 이게 없으면 모바일에서 안됨..
                phonenumber: phone,
                question: question.join(),
                answer : survey.join()
            },
            success : function(result) {
-               /* 설문 완료 후 Redirect */
+               /* 설문 완료 후 결과 페이지로 보내기 취소 시 Redirect */
                if(result == 'success') {
-                   alert('설문에 참여해 주셔서 감사합니다.');
-                   location.href = '/';
+                   if(confirm('설문에 참여해 주셔서 감사합니다.\n결과 페이지로 이동하시겠습니까?')){
+                        location.href = '/result/';
+                   }else {
+                        location.href = '/';
+                   }
+               } else if(result == 'duplicate') { 
+                    alert('이미 설문에 참여한 휴대폰 번호 입니다.');
                }
            },
            error : function(e) {

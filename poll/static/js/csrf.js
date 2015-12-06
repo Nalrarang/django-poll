@@ -2,12 +2,8 @@
 Django에서 Ajax를 사용하기 위해서 필요한 함수 및 세팅
 */
 
-/**
- * setup JQuery's AJAX methods to setup CSRF token in the request before sending it off.
- * http://stackoverflow.com/questions/5100539/django-csrf-check-failing-with-an-ajax-post-request
- */
-function getCookie(name)
-{
+// using jQuery
+function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
         var cookies = document.cookie.split(';');
@@ -22,11 +18,16 @@ function getCookie(name)
     }
     return cookieValue;
 }
-$.ajaxSetup({ 
-     beforeSend: function(xhr, settings) {
-         if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-             // Only send the token to relative URLs i.e. locally.
-             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-         }
-     } 
+var csrftoken = getCookie('csrftoken');
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
 });
