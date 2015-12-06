@@ -1,2 +1,2 @@
 # djangoApp
-django Study
+django 
