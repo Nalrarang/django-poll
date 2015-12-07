@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils import timezone
@@ -81,14 +83,16 @@ def poll_vote(request):
         poll['question'] = request.POST['question']    
         poll['answer'] = request.POST['answer']
         # DB에 투표한 데이터를 저장
-        result = Poll.insert_poll(poll)
+        m_poll = Poll()
+        result = m_poll.insert_poll(poll)
 
         # 저장 후 성공 및 실패 여부를 리턴해준다.
         return HttpResponse(json.dumps(result), content_type = "application/json")
 
 # 조사 결과 데이터 정합
 def result_survey():
-    poll = Poll.show_poll('answer')
+    m_poll = Poll()
+    poll = m_poll.show_poll('answer')
     surveyArray = read_csv()
     result = []
     # 조사 결과의 응답문항별 인원수 체크를 위해 숫자를 넣어줌
@@ -103,6 +107,7 @@ def result_survey():
         data = row['answer'].split(",")
 
         for index,r in enumerate(data):
+            r = r.encode("UTF-8")
             if index < len(surveyArray):
                 if surveyArray[index]['type'] == 'checkbox':
                     r = r.split(":")

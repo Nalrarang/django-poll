@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+#
 from django.db import models
 from django.utils import timezone
 
@@ -13,7 +15,7 @@ class Poll(models.Model):
     created_date = models.DateTimeField(default=timezone.now)
 
     #설문 조사 데이터 Insert Method
-    def insert_poll(data):
+    def insert_poll(self,data):
         #중복 확인 같은 전화번호가 있다면 duplicate를 리턴, 없다면 Insert
         check = Poll.objects.filter(phonenumber = data['phonenumber'])
         if check:
@@ -24,7 +26,7 @@ class Poll(models.Model):
 
         return 'success'
     #설문 조사 데이터 Show Method
-    def show_poll(getType):
+    def show_poll(self,getType):
         if getType == 'answer':
             result = list(Poll.objects.all().values('answer'))
         else: 
